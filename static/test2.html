@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>keyboard</title>
+    <style>
+      body > div {
+        clear: both;
+        overflow: auto;
+        border: 2px solid grey;
+      }
+      body > div > div {
+        width: 64px;
+        line-height: 64px;
+        float: left;
+        border: 1px solid grey;
+        text-align: center;
+      }
+    </style>
+    <script>
+      (function (W) {
+        var D,
+          K,
+          I,
+          pos = 0;
+        var keysDict = {};
+        function init() {
+          D = W.document;
+          I = document.createElement("input");
+          document.body.appendChild(I);
+          I.addEventListener("keydown", enterKey, false);
+
+          K = D.createElement("div");
+          K.id = "k";
+          K.addEventListener("click", h, false);
+          var L = "a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z".split(
+              ","
+            ),
+            l = L.length;
+          for (var a = 0; a < l; a++) {
+            newKey = document.createElement("div");
+            newKey.innerText = L[a];
+            K.appendChild(newKey);
+            keysDict[L[a]] = newKey;
+          }
+          document.body.appendChild(K);
+          K = D.createElement("div");
+          document.body.appendChild(K);
+        }
+        function enterKey(e) {
+          const keyName = event.key;
+          if (keyName !== "Enter") {
+            return;
+          }
+          //console.log(I.value)
+          if (I.value.length != 3) {
+            return;
+          }
+
+          putData(I.value);
+        }
+
+        const putData = async (guess) => {
+          guessCharacters = [];
+          for (i = 0; i < guess.length; i++) {
+            guessCharacters.push(guess[i]);
+          }
+          myDataObject = {
+            Guess: guessCharacters,
+          };
+          const response = await fetch(
+            "http://localhost:10000/api/checkguess",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify(myDataObject),
+            }
+          );
+
+          const data = await response.json();
+
+          // now do whatever you want with the data
+          console.log(data);
+          //return data
+
+          K = D.createElement("div");
+          for (var a = 0; a < data.Guess.length; a++) {
+            let newDif = document.createElement("div");
+            newDif.innerText = data.Guess[a];
+            if (data.Correct[a]) {
+              newDif.style.backgroundColor = "green";
+            } else if (data.Present[a]) {
+              newDif.style.backgroundColor = "yellow";
+            }
+            K.appendChild(newDif);
+
+            if (data.Present[a]) {
+              keysDict[data.Guess[a]].style.backgroundColor = "green";
+            } else {
+              keysDict[data.Guess[a]].style.backgroundColor = "red";
+            }
+          }
+          document.body.appendChild(K);
+        };
+
+        function h(e) {
+          if (e.target.parentNode.id == "k") {
+            pos = I.selectionStart ? I.selectionStart : pos ? pos : 0;
+            var end = I.selectionEnd ? I.selectionEnd : pos;
+            I.value =
+              I.value.substr(0, pos) + e.target.innerText + I.value.substr(end);
+            I.focus();
+            pos++;
+            I.selectionStart = pos;
+            I.selectionEnd = pos;
+          }
+        }
+        W.addEventListener("load", init, false);
+      })(window);
+    </script>
+  </head>
+  <body></body>
+</html>

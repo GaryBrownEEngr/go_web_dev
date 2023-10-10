@@ -1,0 +1,54 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>keyboard</title>
+<style>
+body>div{
+ clear:both;
+ overflow:auto;
+ border:2px solid grey;
+}
+body>div>div{
+ width:64px;line-height:64px;float:left;
+ border:1px solid grey;
+ text-align:center;
+}
+</style>
+<script>
+(function(W){
+ var D,K,I,pos=0;
+ function init(){
+  D=W.document;
+  I=document.createElement('input');
+  document.body.appendChild(I);
+  K=D.createElement('div');
+  K.id="k";
+  K.addEventListener('click',h,false);
+  var L='a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z'.split(','),
+  l=L.length;
+  for(var a=0;a<l;a++){
+   K.appendChild(document.createElement('div')).innerText=L[a];
+  }
+  document.body.appendChild(K);
+ }
+ function h(e){  
+  if(e.target.parentNode.id=='k'){
+   pos=(I.selectionStart?I.selectionStart:pos?pos:0);
+   var end=I.selectionEnd?I.selectionEnd:pos;
+   I.value=I.value.substr(0,pos)+
+   e.target.innerText+
+   I.value.substr(end);
+   I.focus();
+   pos++
+   I.selectionStart=pos;
+   I.selectionEnd=pos;
+  }
+ }
+ W.addEventListener('load',init,false);
+})(window)
+</script>
+</head>
+<body>
+</body>
+</html>

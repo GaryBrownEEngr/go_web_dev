@@ -1,0 +1,46 @@
+<!DOCTYPE html> 
+<html lang="en"> 
+  
+<head> 
+    <meta charset="UTF-8"> 
+    <meta name="viewport" content= 
+        "width=device-width, initial-scale=1.0"> 
+    <meta http-equiv="X-UA-Compatible" 
+        content="ie=edge"> 
+    <title>PUT Request</title> 
+</head> 
+  
+<body> 
+    <h1> 
+        Simple PUT request using fetch  
+    </h1> 
+  
+<script>
+// https://codezup.com/javascript-fetch-api-method-with-examples/
+ const myDataObject = {
+    "Id": 100,
+    "Title": "Newly Created Post", 
+    "desc": "The description for my new post", 
+    "content": "my articles content" 
+};
+
+
+const putData = async ( ) =>{
+   const response = await fetch('http://localhost:10000/api/article', {
+       method: 'POST', 
+       headers: {
+         'Content-Type': 'application/json'
+       },
+       body: JSON.stringify(myDataObject)
+   });
+
+  const data = await response.json( );
+
+  // now do whatever you want with the data  
+   console.log(data);
+};
+putData( );
+</script>
+</body> 
+  
+</html> 
