@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 
-FROM golang:1.19.0-alpine AS builder_Go
+FROM golang:1.21.3-alpine AS builder_Go
 RUN mkdir /backend
 ADD /backend /backend
 WORKDIR /backend
