@@ -1,11 +1,11 @@
 module github.com/GaryBrownEEngr/twertle_api_dev/backend
 
-go 1.19
+go 1.21
 
 require (
 	github.com/gorilla/mux v1.8.0
-	github.com/jszwec/csvutil v1.7.1
-	github.com/stretchr/testify v1.8.1
+	github.com/jszwec/csvutil v1.8.0
+	github.com/stretchr/testify v1.8.4
 )
 
 require (

@@ -108,8 +108,8 @@ I usually turn on auto save in `File > Auto Save`
 The instructions can be found [here](https://go.dev/doc/install).
 
 ```bash
-wget https://go.dev/dl/go1.20.linux-amd64.tar.gz
-sudo rm -rf /usr/local/go && sudo tar -C /usr/local -xzf go1.20.linux-amd64.tar.gz
+wget https://go.dev/dl/go1.21.3.linux-amd64.tar.gz
+sudo rm -rf /usr/local/go && sudo tar -C /usr/local -xzf go1.21.3.linux-amd64.tar.gz
 ```
 
 Now we need to set the env variables.
