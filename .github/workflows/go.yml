@@ -9,6 +9,7 @@ on:
 jobs:
   build:
     name: Go CI
+    timeout-minutes: 10
     runs-on: ubuntu-latest
     defaults:
       run:

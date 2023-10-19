@@ -9,6 +9,7 @@ permissions:
 jobs:
   golangci:
     name: golangci-lint
+    timeout-minutes: 10
     runs-on: ubuntu-latest
     defaults:
       run:
