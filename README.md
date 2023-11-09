@@ -233,3 +233,17 @@ docker rm loving_hamilton # delete a docker image.
 <http://localhost:10000/ticktacktoe>  
 <http://localhost:10000/test2.html>  
 <http://localhost:10000/api/articles>
+
+## Keep Windows From Locking
+
+Open `Windows PowerShell` In the start menu and enter the following script:
+
+```bash
+$WShell = New-Object -com "WScript.shell"
+while($true){
+  $WShell.sendkeys("{SCROLLLOCK}")
+  start-sleep -milliseconds 100
+  $WShell.sendkeys("{SCROLLLOCK}")
+  start-sleep -seconds 240
+}
+```

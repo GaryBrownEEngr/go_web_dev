@@ -59,6 +59,7 @@ Looking it up, I found this: https://superuser.com/questions/307853/permission-d
 
 So, if I add my user to a user-group vboxsf then it works.
 sudo usermod -aG vboxsf $(whoami)
+May need to reboot for it to take effect.
 
 
 
