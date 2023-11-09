@@ -4,7 +4,7 @@
 
 See the file `VM notes.md`
 
-## Install Git
+## Git and GitHub
 
 ```bash
 sudo apt-get install git
@@ -43,25 +43,7 @@ If you have private repos that golang will need to build from. You will need to 
 git config --global --add url."git@github.com".insteadOf "https://github.com"
 ```
 
-### Set Name and Email
-
-In your GitHub `Settings > Email` you should check the `Keep my email addresses private` setting.  
-Then, wit get set your email and username:
-
-```bash
-git config --global user.email "ID+USERNAME@users.noreply.github.com"
-git config --global user.name "NAME"
-```
-
-Then using the following commands will eshow all the git configurations you have set.
-
-```bash
-cat ~/.gitconfig
-```
-
-More info [here](https://docs.github.com/en/account-and-profile/setting-up-and-managing-your-personal-account-on-github/managing-email-preferences/setting-your-commit-email-address).
-  
-### Setup automatic signing of commits
+Now we setup automatic signing of commits
 
 ```bash
 git config --global gpg.format ssh
@@ -69,6 +51,26 @@ git config --global user.signingkey ~/.ssh/id_ed25519.pub
 git config --global commit.gpgsign true
 ```
 
+Now, whenever to you create a commit, it will be signed with your key and marked as verified on GitHub.
+
+### Set Name and Email
+
+In your GitHub `Settings > Email` you should check the `Keep my email addresses private` setting.  
+Then, with git set your email and username:
+
+```bash
+git config --global user.email "ID+USERNAME@users.noreply.github.com"
+git config --global user.name "NAME"
+```
+
+Then, use the following commands to show all the git configurations you have set.
+
+```bash
+cat ~/.gitconfig
+```
+
+More info [here](https://docs.github.com/en/account-and-profile/setting-up-and-managing-your-personal-account-on-github/managing-email-preferences/setting-your-commit-email-address).
+  
 ## Install VS Code
 
 To install vscode, <https://code.visualstudio.com/docs/setup/linux> says to use the command: `sudo apt install ./<file>.deb`
