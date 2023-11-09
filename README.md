@@ -1,26 +1,8 @@
 # Readme
 
-## Updating your VM
+## Basic Linux Setup
 
-```bash
-sudo apt update && sudo apt upgrade
-```
-
-## Add history search to page up and page down
-
-[Stack Overflow answer](https://stackoverflow.com/questions/60153457/how-to-enable-history-search-by-page-up-down-in-git-bash-like-in-linux)
-Basically, edit the `~/.inputrc` file. If it doesn't exist yet, that is okay.
-
-```bash
-code ~/.inputrc
-```
-
-Then add the following lines to the file.
-
-```file
-    "\e[5~": history-search-backward
-    "\e[6~": history-search-forward
-```
+See the file `VM notes.md`
 
 ## Install Git
 
@@ -103,7 +85,9 @@ Then to run it, just type in "code"
 
 I usually turn on auto save in `File > Auto Save`
 
-## Install Go
+## Golang
+
+### Install Go
 
 The instructions can be found [here](https://go.dev/doc/install).
 
@@ -150,7 +134,7 @@ Now verify your installation.
 go version
 ```
 
-## install golangci-lint
+### install golangci-lint
 
 This uses the repo file: `.golangci.yaml`.  
 Go [here](https://golangci-lint.run/usage/install/) for full instructions. The easiest option is to go install it with the following command:
@@ -161,7 +145,7 @@ go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.51.0
 
 Then open your VS code settings and search for `go lint` and update the option `Go: Lint Tool` to be set to `golangci-lint`
 
-## install gofumpt
+### install gofumpt
 
 <https://github.com/mvdan/gofumpt>
 
@@ -169,9 +153,11 @@ Then open your VS code settings and search for `go lint` and update the option `
 go install mvdan.cc/gofumpt@latest
 ```
 
-## Install Docker
+## Docker
 
-Go [here]<https://docs.docker.com/engine/install/ubuntu/> for full instructions.
+### Install Docker
+
+Go [here](ttps://docs.docker.com/engine/install/ubuntu/) for full instructions.
 
 ```bash
 sudo apt-get remove docker docker-engine docker.io containerd runc
@@ -194,7 +180,9 @@ echo \
   sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 ```
 
-### Add your user to the docker group
+### Make docker work without sudo
+
+Add your user to the docker group using the command:
 
 ```bash
 sudo groupadd docker
@@ -202,6 +190,22 @@ sudo usermod -aG docker ${USER}
 ```
 
 Then log out and log back in.
+
+Then test if it worked with `docker run hello-world`
+
+## Random Tips
+
+If you want to remove all the dangling docker images: <https://nickjanetakis.com/blog/docker-tip-31-how-to-remove-dangling-docker-images>
+
+```bash
+docker rmi -f $(docker images -f "dangling=true" -q)
+```
+
+remove all non-running images:
+
+```bash
+docker rm $(docker ps -aq)
+```
 
 ### Test hello world
 
