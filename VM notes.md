@@ -86,3 +86,14 @@ Then add the following lines to the file.
 ```bash
 sudo apt update && sudo apt upgrade
 ```
+
+## Notes on getting VirtualBox Out of Turtle Mode
+
+- If you have installed WSL, then uninstall it in `apps & Features`
+- with the start menu search: open `Turn Windows features on or off` and make sure the following are not unchecked
+  - Hyper-V
+  - Virtual Machine Platform
+  - Windows Hypervisor Platform
+  - Windows Subsystem for Linux
+
+I have read that if `Memory integrity` is enabled, it also blocks VirtualBox from running at full speed.
