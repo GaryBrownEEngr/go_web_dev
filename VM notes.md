@@ -97,3 +97,13 @@ sudo apt update && sudo apt upgrade
   - Windows Subsystem for Linux
 
 I have read that if `Memory integrity` is enabled, it also blocks VirtualBox from running at full speed.
+Go to `start->Windows Security->Device secuirty->Core isolation details->Memory integrity`
+
+Also `Virtualization-based security` needs to be off.
+
+Go to: `start->System Information`  and look for the row that says `Virtualization-based security`. Hopefully is says `Not enabled`
+
+If not, then there may be a bios setting called `SSM Security Mitigation`. Or maybe turn it off in the registry. It isn't clear what actually turns it off perminatly.
+
+- <https://www.anoopcnair.com/disable-virtualization-based-security-windows/>
+- <https://linustechtips.com/topic/1053524-cant-disable-virtualization-based-security/>
