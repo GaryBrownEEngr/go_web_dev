@@ -36,5 +36,5 @@ jobs:
           REPOSITORY: gary.b.eengr_private
           IMAGE_TAG: ${{ github.sha }}
         run: |
-          docker build -t $REGISTRY/$REPOSITORY/go_web_dev:$IMAGE_TAG .
-          docker push $REGISTRY/$REPOSITORY/go_web_dev:$IMAGE_TAG
+          docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
+          docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
