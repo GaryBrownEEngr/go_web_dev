@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/GaryBrownEEngr/twertle_api_dev/backend/api"
 	"github.com/GaryBrownEEngr/twertle_api_dev/backend/articlestore"
@@ -24,7 +25,11 @@ func main() {
 	articles := articlestore.NewStore(Articles)
 
 	server := api.NewServer(articles)
-	log.Fatal(http.ListenAndServe(":10000", server))
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+	log.Fatal(http.ListenAndServe(":"+port, server))
 	// log.Fatal(http.ListenAndServe("localhost:10000", server))
 
 	// go to http://localhost:10000/
