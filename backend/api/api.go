@@ -61,7 +61,10 @@ func (m *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		r.URL.Path)
 }
 
-func NewServer(articles models.ArticleStore) *Server {
+func NewServer(
+	articles models.ArticleStore,
+	secrets models.SecretStore,
+) *Server {
 	myRouter := mux.NewRouter().StrictSlash(true)
 
 	myRouter.HandleFunc("/api/articles", returnAllArticles(articles))

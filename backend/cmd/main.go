@@ -12,6 +12,7 @@ import (
 
 	"github.com/GaryBrownEEngr/twertle_api_dev/backend/api"
 	"github.com/GaryBrownEEngr/twertle_api_dev/backend/articlestore"
+	"github.com/GaryBrownEEngr/twertle_api_dev/backend/aws/secrets"
 	"github.com/GaryBrownEEngr/twertle_api_dev/backend/models"
 )
 
@@ -24,7 +25,13 @@ func main() {
 
 	articles := articlestore.NewStore(Articles)
 
-	server := api.NewServer(articles)
+	secretCache, err := secrets.NewSecretManager()
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println(secretCache.Get("Best bacon"))
+
+	server := api.NewServer(articles, secretCache)
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"
