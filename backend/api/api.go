@@ -34,6 +34,8 @@ func (w *LogResponseWriter) Write(body []byte) (int, error) {
 type Server struct {
 	articles models.ArticleStore
 	mux      *mux.Router
+	secrets  models.SecretStore
+	keyDB    models.KeyDBStore
 }
 
 func (m *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -64,6 +66,7 @@ func (m *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 func NewServer(
 	articles models.ArticleStore,
 	secrets models.SecretStore,
+	keyDB models.KeyDBStore,
 ) *Server {
 	myRouter := mux.NewRouter().StrictSlash(true)
 
@@ -76,7 +79,12 @@ func NewServer(
 	fileServer := http.FileServer(http.Dir("./static"))
 	myRouter.PathPrefix("/").Handler(fileServer)
 
-	return &Server{mux: myRouter, articles: articles}
+	return &Server{
+		mux:      myRouter,
+		articles: articles,
+		secrets:  secrets,
+		keyDB:    keyDB,
+	}
 }
 
 type apiError struct {

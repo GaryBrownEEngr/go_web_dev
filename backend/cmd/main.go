@@ -5,6 +5,7 @@ package main
 // https://tutorialedge.net/golang/creating-simple-web-server-with-golang/
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"net/http"
@@ -12,7 +13,8 @@ import (
 
 	"github.com/GaryBrownEEngr/twertle_api_dev/backend/api"
 	"github.com/GaryBrownEEngr/twertle_api_dev/backend/articlestore"
-	"github.com/GaryBrownEEngr/twertle_api_dev/backend/aws/secrets"
+	"github.com/GaryBrownEEngr/twertle_api_dev/backend/aws/awsDynamo"
+	"github.com/GaryBrownEEngr/twertle_api_dev/backend/aws/awssecrets"
 	"github.com/GaryBrownEEngr/twertle_api_dev/backend/models"
 )
 
@@ -25,13 +27,29 @@ func main() {
 
 	articles := articlestore.NewStore(Articles)
 
-	secretCache, err := secrets.NewSecretManager()
+	secrets, err := awssecrets.NewSecretManager()
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println(secretCache.Get("Best bacon"))
+	fmt.Println(secrets.Get("Best bacon"))
 
-	server := api.NewServer(articles, secretCache)
+	dynamodbHandle, err := awsDynamo.NewDynamoDB("GoWebDev")
+	if err != nil {
+		log.Fatal(err)
+	}
+	type t2 struct {
+		Name     string
+		Problems []string
+	}
+
+	var d2 t2
+	err = dynamodbHandle.Get(context.TODO(), "Bacon", &d2)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println(d2)
+
+	server := api.NewServer(articles, secrets, dynamodbHandle)
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"
