@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/GaryBrownEEngr/twertle_api_dev/backend/models"
+	"github.com/GaryBrownEEngr/go_web_dev/backend/models"
 )
 
 func Test_store_CreateArticle(t *testing.T) {

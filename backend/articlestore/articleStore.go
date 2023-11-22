@@ -1,7 +1,7 @@
 package articlestore
 
 import (
-	"github.com/GaryBrownEEngr/twertle_api_dev/backend/models"
+	"github.com/GaryBrownEEngr/go_web_dev/backend/models"
 )
 
 type store struct {

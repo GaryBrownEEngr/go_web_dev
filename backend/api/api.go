@@ -2,11 +2,11 @@ package api
 
 import (
 	"bytes"
-	"log"
+	"fmt"
 	"net/http"
 	"time"
 
-	"github.com/GaryBrownEEngr/twertle_api_dev/backend/models"
+	"github.com/GaryBrownEEngr/go_web_dev/backend/models"
 
 	"github.com/gorilla/mux"
 )
@@ -32,10 +32,11 @@ func (w *LogResponseWriter) Write(body []byte) (int, error) {
 }
 
 type Server struct {
-	articles models.ArticleStore
-	mux      *mux.Router
-	secrets  models.SecretStore
-	keyDB    models.KeyDBStore
+	articles   models.ArticleStore
+	mux        *mux.Router
+	secrets    models.SecretStore
+	keyDB      models.KeyDBStore
+	tokenMaker models.TokenMaker
 }
 
 func (m *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -56,8 +57,8 @@ func (m *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	endTime := time.Now()
 	elapsed := endTime.Sub(startTime)
-	log.Printf(
-		"duration=%dns status=%d path=%s",
+	fmt.Printf(
+		"duration=%dns status=%d path=%s\n",
 		elapsed,
 		logRespWriter.statusCode,
 		r.URL.Path)
@@ -67,6 +68,7 @@ func NewServer(
 	articles models.ArticleStore,
 	secrets models.SecretStore,
 	keyDB models.KeyDBStore,
+	tokenMaker models.TokenMaker,
 ) *Server {
 	myRouter := mux.NewRouter().StrictSlash(true)
 
@@ -80,10 +82,11 @@ func NewServer(
 	myRouter.PathPrefix("/").Handler(fileServer)
 
 	return &Server{
-		mux:      myRouter,
-		articles: articles,
-		secrets:  secrets,
-		keyDB:    keyDB,
+		mux:        myRouter,
+		articles:   articles,
+		secrets:    secrets,
+		keyDB:      keyDB,
+		tokenMaker: tokenMaker,
 	}
 }
 

@@ -11,29 +11,38 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/GaryBrownEEngr/twertle_api_dev/backend/api"
-	"github.com/GaryBrownEEngr/twertle_api_dev/backend/articlestore"
-	"github.com/GaryBrownEEngr/twertle_api_dev/backend/aws/awsDynamo"
-	"github.com/GaryBrownEEngr/twertle_api_dev/backend/aws/awssecrets"
-	"github.com/GaryBrownEEngr/twertle_api_dev/backend/models"
+	"github.com/GaryBrownEEngr/go_web_dev/backend/api"
+	"github.com/GaryBrownEEngr/go_web_dev/backend/articlestore"
+	"github.com/GaryBrownEEngr/go_web_dev/backend/aws/awsDynamo"
+	"github.com/GaryBrownEEngr/go_web_dev/backend/aws/awssecrets"
+	"github.com/GaryBrownEEngr/go_web_dev/backend/models"
+	"github.com/GaryBrownEEngr/go_web_dev/backend/utils"
 )
 
 func main() {
-	fmt.Println("Rest API v2.0 - Mux Routers")
+	log.SetFlags(log.Lshortfile)
+	gitHash, err := utils.GitBuildHashGet()
+	if err != nil {
+		log.Printf("Error while getting Git Hash: %v\n", err)
+	}
+	fmt.Printf("Go Web Dev: %s, %s\n", gitHash.Hash, gitHash.BuildTime)
+
+	// Setup pretend articles
 	Articles := []models.Article{
 		{Id: 1, Title: "Hello", Desc: "Article Description for Hello", Content: "Article Content for Hello"},
 		{Id: 2, Title: "Hello2", Desc: "Article Description for Hello2", Content: "Article Content for Hello2"},
 	}
-
 	articles := articlestore.NewStore(Articles)
 
+	// Setup AWS Secret Manager
 	secrets, err := awssecrets.NewSecretManager()
 	if err != nil {
 		log.Fatal(err)
 	}
 	fmt.Println(secrets.Get("Best bacon"))
 
-	dynamodbHandle, err := awsDynamo.NewDynamoDB("GoWebDev")
+	// Setup AWS DynamoDB
+	dynamodbHandle, err := awsDynamo.NewDynamoDB("GoWebDev", "Name")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -41,7 +50,6 @@ func main() {
 		Name     string
 		Problems []string
 	}
-
 	var d2 t2
 	err = dynamodbHandle.Get(context.TODO(), "Bacon", &d2)
 	if err != nil {
@@ -49,7 +57,18 @@ func main() {
 	}
 	fmt.Println(d2)
 
-	server := api.NewServer(articles, secrets, dynamodbHandle)
+	// Setup the Paseto token maker
+	paseto_maker_symmetric_key, err := secrets.Get("paseto_maker_symmetric_key")
+	if err != nil {
+		log.Fatal(err)
+	}
+	tokenMaker, err := utils.NewPasetoMaker(paseto_maker_symmetric_key)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Build and run the server
+	server := api.NewServer(articles, secrets, dynamodbHandle, tokenMaker)
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"

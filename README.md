@@ -32,7 +32,7 @@ Also enter the key again in GitHub as a signing key.
 Now, we should be able to clone the repo using the SSH link.
 
 ```bash
-git clone git@github.com:GaryBrownEEngr/twertle_api_dev.git
+git clone git@github.com:GaryBrownEEngr/go_web_dev.git
 ```
 
 ### Private repos and Golang

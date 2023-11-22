@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/GaryBrownEEngr/twertle_api_dev/backend/models"
-	"github.com/GaryBrownEEngr/twertle_api_dev/backend/utils/stacktrs"
+	"github.com/GaryBrownEEngr/go_web_dev/backend/models"
+	"github.com/GaryBrownEEngr/go_web_dev/backend/utils/stacktrs"
 	"github.com/jszwec/csvutil"
 )
 

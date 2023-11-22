@@ -6,7 +6,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/GaryBrownEEngr/twertle_api_dev/backend/models"
+	"github.com/GaryBrownEEngr/go_web_dev/backend/models"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/secretsmanager"

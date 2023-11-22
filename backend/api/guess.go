@@ -6,7 +6,7 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/GaryBrownEEngr/twertle_api_dev/backend/models"
+	"github.com/GaryBrownEEngr/go_web_dev/backend/models"
 )
 
 func checkGuess(w http.ResponseWriter, r *http.Request) {

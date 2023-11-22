@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/GaryBrownEEngr/twertle_api_dev/backend/models"
+	"github.com/GaryBrownEEngr/go_web_dev/backend/models"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
@@ -13,8 +13,9 @@ import (
 )
 
 type dbState struct {
-	service   *dynamodb.Client
-	tableName string
+	service      *dynamodb.Client
+	tableName    string
+	partitionKey string
 }
 
 var _ models.KeyDBStore = &dbState{}
@@ -23,9 +24,10 @@ var _ models.KeyDBStore = &dbState{}
 // https://docs.aws.amazon.com/code-library/latest/ug/go_2_dynamodb_code_examples.html
 // https://github.com/awsdocs/aws-doc-sdk-examples/blob/main/gov2/dynamodb/actions/table_basics.go#L216
 
-func NewDynamoDB(tableName string) (*dbState, error) {
+func NewDynamoDB(tableName, partitionKey string) (*dbState, error) {
 	ret := &dbState{
-		tableName: tableName,
+		tableName:    tableName,
+		partitionKey: partitionKey,
 	}
 
 	region := "us-west-2"
@@ -45,7 +47,7 @@ func (s *dbState) Get(ctx context.Context, key string, out interface{}) error {
 	params := &dynamodb.GetItemInput{
 		TableName: aws.String(s.tableName),
 		Key: map[string]types.AttributeValue{
-			"Name": &types.AttributeValueMemberS{Value: key},
+			s.partitionKey: &types.AttributeValueMemberS{Value: key},
 		},
 	}
 	response, err := s.service.GetItem(ctx, params)
