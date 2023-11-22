@@ -46,6 +46,6 @@ func NewUserErrLog(endUserSafeMsg string, returnCode int, innerErr error) error 
 }
 
 func NewUserErrLogHash(endUserSafeMsg string, returnCode int, innerErr error) error {
-	endUserSafeMsg += HashError(innerErr)
+	endUserSafeMsg = endUserSafeMsg + " " + HashError(innerErr)
 	return NewUserErrLog(endUserSafeMsg, returnCode, innerErr)
 }

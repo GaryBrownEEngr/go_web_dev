@@ -5,7 +5,6 @@ package main
 // https://tutorialedge.net/golang/creating-simple-web-server-with-golang/
 
 import (
-	"context"
 	"fmt"
 	"log"
 	"net/http"
@@ -13,9 +12,9 @@ import (
 
 	"github.com/GaryBrownEEngr/go_web_dev/backend/api"
 	"github.com/GaryBrownEEngr/go_web_dev/backend/articlestore"
-	"github.com/GaryBrownEEngr/go_web_dev/backend/aws/awsDynamo"
 	"github.com/GaryBrownEEngr/go_web_dev/backend/aws/awssecrets"
 	"github.com/GaryBrownEEngr/go_web_dev/backend/models"
+	"github.com/GaryBrownEEngr/go_web_dev/backend/sessionuser"
 	"github.com/GaryBrownEEngr/go_web_dev/backend/utils"
 )
 
@@ -41,21 +40,11 @@ func main() {
 	}
 	fmt.Println(secrets.Get("Best bacon"))
 
-	// Setup AWS DynamoDB
-	dynamodbHandle, err := awsDynamo.NewDynamoDB("GoWebDev", "Name")
+	// Setup AWS DynamoDB based user store
+	users, err := sessionuser.NewUserStore()
 	if err != nil {
 		log.Fatal(err)
 	}
-	type t2 struct {
-		Name     string
-		Problems []string
-	}
-	var d2 t2
-	err = dynamodbHandle.Get(context.TODO(), "Bacon", &d2)
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Println(d2)
 
 	// Setup the Paseto token maker
 	paseto_maker_symmetric_key, err := secrets.Get("paseto_maker_symmetric_key")
@@ -68,11 +57,12 @@ func main() {
 	}
 
 	// Build and run the server
-	server := api.NewServer(articles, secrets, dynamodbHandle, tokenMaker)
+	server := api.NewServer(articles, secrets, users, tokenMaker)
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"
 	}
+	fmt.Println("Setup Complete. Listening on " + port)
 	log.Fatal(http.ListenAndServe(":"+port, server))
 	// log.Fatal(http.ListenAndServe("localhost:10000", server))
 

@@ -35,7 +35,7 @@ type Server struct {
 	articles   models.ArticleStore
 	mux        *mux.Router
 	secrets    models.SecretStore
-	keyDB      models.KeyDBStore
+	users      models.UserStore
 	tokenMaker models.TokenMaker
 }
 
@@ -67,27 +67,37 @@ func (m *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 func NewServer(
 	articles models.ArticleStore,
 	secrets models.SecretStore,
-	keyDB models.KeyDBStore,
+	users models.UserStore,
 	tokenMaker models.TokenMaker,
 ) *Server {
 	myRouter := mux.NewRouter().StrictSlash(true)
 
-	myRouter.HandleFunc("/api/articles", returnAllArticles(articles))
-	myRouter.HandleFunc("/api/article", createNewArticle(articles)).Methods("POST")
-	myRouter.HandleFunc("/api/article/{id}", returnSingleArticle(articles)).Methods("GET")
-	myRouter.HandleFunc("/api/article/{id}", deleteSingleArticle(articles)).Methods("DELETE")
-	myRouter.HandleFunc("/api/checkguess", checkGuess)
-
-	fileServer := http.FileServer(http.Dir("./static"))
-	myRouter.PathPrefix("/").Handler(fileServer)
-
-	return &Server{
+	ret := &Server{
 		mux:        myRouter,
 		articles:   articles,
 		secrets:    secrets,
-		keyDB:      keyDB,
+		users:      users,
 		tokenMaker: tokenMaker,
 	}
+
+	ret.AddRoutes()
+
+	return ret
+}
+
+func (s *Server) AddRoutes() {
+	s.mux.HandleFunc("/api/articles", returnAllArticles(s.articles))
+	s.mux.HandleFunc("/api/article", createNewArticle(s.articles)).Methods("POST")
+	s.mux.HandleFunc("/api/article/{id}", returnSingleArticle(s.articles)).Methods("GET")
+	s.mux.HandleFunc("/api/article/{id}", deleteSingleArticle(s.articles)).Methods("DELETE")
+	s.mux.HandleFunc("/api/checkguess", checkGuess)
+
+	s.mux.HandleFunc("/api/user/create", s.userCreate()).Methods("POST")
+	s.mux.HandleFunc("/api/user/login", s.userLogin()).Methods("POST")
+	s.mux.HandleFunc("/api/user/delete", s.userDelete()).Methods("POST")
+
+	fileServer := http.FileServer(http.Dir("./static"))
+	s.mux.PathPrefix("/").Handler(fileServer)
 }
 
 type apiError struct {

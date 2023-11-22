@@ -1,4 +1,4 @@
-package user
+package sessionuser
 
 import (
 	"testing"
@@ -6,32 +6,6 @@ import (
 	"github.com/GaryBrownEEngr/go_web_dev/backend/utils"
 	"github.com/stretchr/testify/require"
 )
-
-func Test_hashPassword(t *testing.T) {
-	hash1, err := hashPassword("bacon1234")
-	require.NoError(t, err)
-	hash2, err := hashPassword("bacon1234")
-	require.NoError(t, err)
-	hash3, err := hashPassword("bacon1234")
-	require.NoError(t, err)
-
-	require.NotEqual(t, hash1, hash2)
-	require.NotEqual(t, hash1, hash3)
-	require.NotEqual(t, hash2, hash3)
-
-	require.True(t, doPasswordsMatch(hash1, "bacon1234"))
-	require.True(t, doPasswordsMatch(hash2, "bacon1234"))
-	require.True(t, doPasswordsMatch(hash3, "bacon1234"))
-
-	require.False(t, doPasswordsMatch(hash1, "bacon12345"))
-	require.False(t, doPasswordsMatch(hash2, "bacon123"))
-	require.False(t, doPasswordsMatch(hash3, "bacon1235"))
-	require.False(t, doPasswordsMatch(hash3, ""))
-
-	require.False(t, doPasswordsMatch("", "bacon1235"))
-	require.False(t, doPasswordsMatch("", ""))
-	require.False(t, doPasswordsMatch("abc", ""))
-}
 
 func TestNewUserStore(t *testing.T) {
 	t.SkipNow()

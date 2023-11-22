@@ -36,6 +36,10 @@ func TestPasetoMaker(t *testing.T) {
 	require.False(t, ok)
 	require.Empty(t, payload)
 
+	payload, ok = maker.Verify(nil)
+	require.False(t, ok)
+	require.Empty(t, payload)
+
 	// Check other errors
 	token, err = maker.Create("", time.Second)
 	require.Error(t, err)

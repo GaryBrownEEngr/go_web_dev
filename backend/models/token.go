@@ -47,7 +47,7 @@ func (s *Payload) Valid() bool {
 	}
 
 	// Make sure the token was created in the past, with 5 seconds of wiggle room.
-	if now.Add(-time.Second * 5).After(s.IssuedAt) {
+	if now.Add(time.Second * 5).Before(s.IssuedAt) {
 		return false
 	}
 
@@ -55,6 +55,6 @@ func (s *Payload) Valid() bool {
 }
 
 type TokenMaker interface {
-	Create(username string, duration time.Duration) (Token, error)
-	Verify(token Token) (*Payload, bool)
+	Create(username string, duration time.Duration) (*Token, error)
+	Verify(token *Token) (*Payload, bool)
 }

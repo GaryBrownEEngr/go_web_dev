@@ -12,5 +12,5 @@ type User struct {
 type UserStore interface {
 	CreateUser(username, password string) (*User, error)
 	VerifyPassword(username, password string) (*User, error)
-	DeleteUser(in User) error
+	DeleteUser(username string) error
 }

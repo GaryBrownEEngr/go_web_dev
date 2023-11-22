@@ -1,4 +1,4 @@
-package user
+package sessionuser
 
 import (
 	"context"
@@ -11,7 +11,6 @@ import (
 	"github.com/GaryBrownEEngr/go_web_dev/backend/models"
 	"github.com/GaryBrownEEngr/go_web_dev/backend/utils"
 	"github.com/GaryBrownEEngr/go_web_dev/backend/utils/stacktrs"
-	"golang.org/x/crypto/bcrypt"
 )
 
 type userStore struct {
@@ -27,7 +26,7 @@ func NewUserStore() (*userStore, error) {
 		return nil, stacktrs.Wrap(err)
 	}
 
-	garbageHash, err := hashPassword("Garbage Password")
+	garbageHash, err := utils.HashPassword("Garbage Password")
 	if err != nil {
 		return nil, stacktrs.Wrap(err)
 	}
@@ -64,7 +63,7 @@ func (s *userStore) CreateUser(username, password string) (*models.User, error) 
 		<-timer.C
 	}()
 
-	hash, err := hashPassword(password)
+	hash, err := utils.HashPassword(password)
 	if err != nil {
 		return nil, utils.NewUserErrLogHash("Error creating user", http.StatusInternalServerError, err)
 	}
@@ -113,7 +112,7 @@ func (s *userStore) VerifyPassword(username, password string) (*models.User, err
 	hashHasRun := false
 	defer func() {
 		if !hashHasRun {
-			_ = doPasswordsMatch(s.garbageHash, password)
+			_ = utils.VerifyPassword(s.garbageHash, password)
 		}
 		<-timer.C
 	}()
@@ -127,7 +126,7 @@ func (s *userStore) VerifyPassword(username, password string) (*models.User, err
 		return nil, utils.NewUserErrLogHash("Invalid username or password", http.StatusUnauthorized, fmt.Errorf(username))
 	}
 
-	if !doPasswordsMatch(u.HashedPassword, password) {
+	if !utils.VerifyPassword(u.HashedPassword, password) {
 		return nil, utils.NewUserErrLogHash("Invalid username or password", http.StatusUnauthorized, fmt.Errorf(username))
 	}
 
@@ -139,21 +138,11 @@ func (s *userStore) VerifyPassword(username, password string) (*models.User, err
 	return ret, nil
 }
 
-func (s *userStore) DeleteUser(in models.User) error {
-	return utils.NewUserErrLog("Error deleting user", http.StatusInternalServerError, stacktrs.Errorf("Not implemented"))
-}
+func (s *userStore) DeleteUser(username string) error {
+	err := s.db.Delete(context.TODO(), username)
+	if err != nil {
+		return utils.NewUserErrLogHash("Error deleting user", http.StatusInternalServerError, err)
+	}
 
-// Hash password using Bcrypt
-func hashPassword(password string) (string, error) {
-	// Convert password string to byte slice
-	passwordBytes := []byte(password)
-	// Hash password with Bcrypt's min cost
-	hashedPasswordBytes, err := bcrypt.GenerateFromPassword(passwordBytes, bcrypt.DefaultCost)
-	return string(hashedPasswordBytes), err
-}
-
-// Check if two passwords match using Bcrypt's CompareHashAndPassword
-func doPasswordsMatch(hashedPassword, currPassword string) bool {
-	err := bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(currPassword))
-	return err == nil
+	return nil
 }

@@ -28,24 +28,30 @@ func NewPasetoMaker(symmetricKey string) (*pasetoMaker, error) {
 	return ret, nil
 }
 
-func (s *pasetoMaker) Create(username string, duration time.Duration) (models.Token, error) {
+func (s *pasetoMaker) Create(username string, duration time.Duration) (*models.Token, error) {
 	payload, err := models.NewPlayload(username, duration)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	ret, err := s.paseto.Encrypt(s.symmetricKey, payload, nil)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	return models.Token(ret), nil
+	token := models.Token(ret)
+
+	return &token, nil
 }
 
-func (s *pasetoMaker) Verify(token models.Token) (*models.Payload, bool) {
+func (s *pasetoMaker) Verify(token *models.Token) (*models.Payload, bool) {
+	if token == nil {
+		return nil, false
+	}
+
 	payload := &models.Payload{}
 
-	err := s.paseto.Decrypt(string(token), s.symmetricKey, payload, nil)
+	err := s.paseto.Decrypt(string(*token), s.symmetricKey, payload, nil)
 	if err != nil {
 		return nil, false
 	}

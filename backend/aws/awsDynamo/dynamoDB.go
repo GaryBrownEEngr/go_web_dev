@@ -80,3 +80,18 @@ func (s *dbState) Put(ctx context.Context, in interface{}) error {
 
 	return nil
 }
+
+func (s *dbState) Delete(ctx context.Context, key string) error {
+	params := &dynamodb.DeleteItemInput{
+		TableName: aws.String(s.tableName),
+		Key: map[string]types.AttributeValue{
+			s.partitionKey: &types.AttributeValueMemberS{Value: key},
+		},
+	}
+	_, err := s.service.DeleteItem(ctx, params)
+	if err != nil {
+		return fmt.Errorf("Error when deleting DynamoDB Key: %s, %s: %w", s.tableName, key, err)
+	}
+
+	return nil
+}
