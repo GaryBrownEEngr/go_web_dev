@@ -11,6 +11,7 @@ import (
 	"github.com/GaryBrownEEngr/go_web_dev/backend/models"
 	"github.com/GaryBrownEEngr/go_web_dev/backend/utils"
 	"github.com/GaryBrownEEngr/go_web_dev/backend/utils/stacktrs"
+	"github.com/GaryBrownEEngr/go_web_dev/backend/utils/uerr"
 )
 
 type userStore struct {
@@ -48,10 +49,10 @@ type DbUser struct {
 func (s *userStore) CreateUser(username, password string) (*models.User, error) {
 	username = strings.ToLower(username)
 	if len(username) < 2 || len(username) > 100 {
-		return nil, utils.NewUserErr("Username is too short", http.StatusBadRequest)
+		return nil, uerr.UErr("Username is too short", http.StatusBadRequest)
 	}
 	if len(password) < 6 || len(password) > 100 {
-		return nil, utils.NewUserErr("Password is too short", http.StatusBadRequest)
+		return nil, uerr.UErr("Password is too short", http.StatusBadRequest)
 	}
 
 	// Make it so this function is time constant
@@ -65,16 +66,16 @@ func (s *userStore) CreateUser(username, password string) (*models.User, error) 
 
 	hash, err := utils.HashPassword(password)
 	if err != nil {
-		return nil, utils.NewUserErrLogHash("Error creating user", http.StatusInternalServerError, err)
+		return nil, uerr.UErrLogHash("Error creating user", http.StatusInternalServerError, err)
 	}
 
 	u := DbUser{}
 	err = s.db.Get(context.TODO(), username, &u)
 	if err != nil {
-		return nil, utils.NewUserErrLogHash("Error creating user", http.StatusInternalServerError, err)
+		return nil, uerr.UErrLogHash("Error creating user", http.StatusInternalServerError, err)
 	}
 	if u.Username == username {
-		return nil, utils.NewUserErrLog("Username already used: "+username, http.StatusBadRequest, nil)
+		return nil, uerr.UErrLog("Username already used: "+username, http.StatusBadRequest, nil)
 	}
 
 	u = DbUser{
@@ -85,7 +86,7 @@ func (s *userStore) CreateUser(username, password string) (*models.User, error) 
 
 	err = s.db.Put(context.TODO(), &u)
 	if err != nil {
-		return nil, utils.NewUserErrLogHash("Error creating user", http.StatusInternalServerError, err)
+		return nil, uerr.UErrLogHash("Error creating user", http.StatusInternalServerError, err)
 	}
 
 	ret := &models.User{
@@ -98,10 +99,10 @@ func (s *userStore) CreateUser(username, password string) (*models.User, error) 
 func (s *userStore) VerifyPassword(username, password string) (*models.User, error) {
 	username = strings.ToLower(username)
 	if len(username) < 2 || len(username) > 100 {
-		return nil, utils.NewUserErr("Username is too short", http.StatusBadRequest)
+		return nil, uerr.UErr("Username is too short", http.StatusBadRequest)
 	}
 	if len(password) < 6 || len(password) > 100 {
-		return nil, utils.NewUserErr("Password is too short", http.StatusBadRequest)
+		return nil, uerr.UErr("Password is too short", http.StatusBadRequest)
 	}
 
 	// Make it so this function is time constant
@@ -120,14 +121,14 @@ func (s *userStore) VerifyPassword(username, password string) (*models.User, err
 	u := DbUser{}
 	err := s.db.Get(context.TODO(), username, &u)
 	if err != nil {
-		return nil, utils.NewUserErrLogHash("Error getting user", http.StatusInternalServerError, err)
+		return nil, uerr.UErrLogHash("Error getting user", http.StatusInternalServerError, err)
 	}
 	if u.Username == "" {
-		return nil, utils.NewUserErrLogHash("Invalid username or password", http.StatusUnauthorized, fmt.Errorf(username))
+		return nil, uerr.UErrLogHash("Invalid username or password", http.StatusUnauthorized, fmt.Errorf(username))
 	}
 
 	if !utils.VerifyPassword(u.HashedPassword, password) {
-		return nil, utils.NewUserErrLogHash("Invalid username or password", http.StatusUnauthorized, fmt.Errorf(username))
+		return nil, uerr.UErrLogHash("Invalid username or password", http.StatusUnauthorized, fmt.Errorf(username))
 	}
 
 	ret := &models.User{
@@ -141,7 +142,7 @@ func (s *userStore) VerifyPassword(username, password string) (*models.User, err
 func (s *userStore) DeleteUser(username string) error {
 	err := s.db.Delete(context.TODO(), username)
 	if err != nil {
-		return utils.NewUserErrLogHash("Error deleting user", http.StatusInternalServerError, err)
+		return uerr.UErrLogHash("Error deleting user", http.StatusInternalServerError, err)
 	}
 
 	return nil

@@ -2,8 +2,10 @@ package models
 
 import (
 	"fmt"
+	"net/http"
 	"time"
 
+	"github.com/GaryBrownEEngr/go_web_dev/backend/utils/uerr"
 	"github.com/google/uuid"
 )
 
@@ -40,21 +42,21 @@ func NewPlayload(username string, duration time.Duration) (*Payload, error) {
 	return ret, nil
 }
 
-func (s *Payload) Valid() bool {
+func (s *Payload) Valid() error {
 	now := time.Now()
 	if now.After(s.ExpiredAt) {
-		return false
+		return uerr.UErrLog("Token expired", http.StatusUnauthorized, fmt.Errorf(s.Username))
 	}
 
 	// Make sure the token was created in the past, with 5 seconds of wiggle room.
 	if now.Add(time.Second * 5).Before(s.IssuedAt) {
-		return false
+		return uerr.UErrLogHash("Token being used before created time", http.StatusUnauthorized, fmt.Errorf(s.Username))
 	}
 
-	return true
+	return nil
 }
 
 type TokenMaker interface {
 	Create(username string, duration time.Duration) (*Token, error)
-	Verify(token *Token) (*Payload, bool)
+	Verify(token *Token) (*Payload, error)
 }

@@ -13,6 +13,7 @@ import (
 	"github.com/GaryBrownEEngr/go_web_dev/backend/api"
 	"github.com/GaryBrownEEngr/go_web_dev/backend/articlestore"
 	"github.com/GaryBrownEEngr/go_web_dev/backend/aws/awssecrets"
+	"github.com/GaryBrownEEngr/go_web_dev/backend/gamestore"
 	"github.com/GaryBrownEEngr/go_web_dev/backend/models"
 	"github.com/GaryBrownEEngr/go_web_dev/backend/sessionuser"
 	"github.com/GaryBrownEEngr/go_web_dev/backend/utils"
@@ -45,6 +46,10 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	mathData, err := gamestore.NewUserStore()
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	// Setup the Paseto token maker
 	paseto_maker_symmetric_key, err := secrets.Get("paseto_maker_symmetric_key")
@@ -57,7 +62,7 @@ func main() {
 	}
 
 	// Build and run the server
-	server := api.NewServer(articles, secrets, users, tokenMaker)
+	server := api.NewServer(articles, secrets, users, mathData, tokenMaker)
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"

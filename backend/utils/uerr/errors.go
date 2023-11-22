@@ -1,4 +1,4 @@
-package utils
+package uerr
 
 import (
 	"crypto/sha256"

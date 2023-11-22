@@ -5,6 +5,8 @@ import (
 	"errors"
 	"log"
 	"net/http"
+
+	"github.com/GaryBrownEEngr/go_web_dev/backend/utils/uerr"
 )
 
 func EncodeJSON(w http.ResponseWriter, thing interface{}, status int) {
@@ -25,16 +27,16 @@ func OutputError(w http.ResponseWriter, err error) {
 // This looks for a wrapped userErr and uses its message and code if possible.
 // Otherwise the error is replaced with a hash
 func OutputErrorAndCode(w http.ResponseWriter, err error, code int) {
-	var userErr *UserErr
+	var userErr *uerr.UserErrorData
 	if errors.As(err, &userErr) {
 		errorMsg, code := userErr.UserMsgAndCode()
 		http.Error(w, errorMsg, code)
-		if userErr.shouldLog {
-			log.Println(UnwrapAllErrorsForLog(err))
+		if userErr.ShouldLog() {
+			log.Println(uerr.UnwrapAllErrorsForLog(err))
 		}
 		return
 	}
 
-	errorMsg := "Error: " + HashError(err)
+	errorMsg := "Error: " + uerr.HashError(err)
 	http.Error(w, errorMsg, code)
 }

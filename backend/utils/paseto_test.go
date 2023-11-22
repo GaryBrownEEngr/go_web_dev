@@ -15,8 +15,8 @@ func TestPasetoMaker(t *testing.T) {
 	require.NoError(t, err)
 	require.NotEmpty(t, token)
 
-	payload, ok := maker.Verify(token)
-	require.True(t, ok)
+	payload, err := maker.Verify(token)
+	require.NoError(t, err)
 	require.NotEmpty(t, payload)
 
 	require.NotZero(t, payload.ID)
@@ -28,16 +28,16 @@ func TestPasetoMaker(t *testing.T) {
 	token, err = maker.Create("Bob", time.Millisecond*100)
 	require.NoError(t, err)
 	require.NotEmpty(t, token)
-	payload, ok = maker.Verify(token)
-	require.True(t, ok)
+	payload, err = maker.Verify(token)
+	require.NoError(t, err)
 	require.NotEmpty(t, payload)
 	time.Sleep(time.Millisecond * 200)
-	payload, ok = maker.Verify(token)
-	require.False(t, ok)
+	payload, err = maker.Verify(token)
+	require.Error(t, err)
 	require.Empty(t, payload)
 
-	payload, ok = maker.Verify(nil)
-	require.False(t, ok)
+	payload, err = maker.Verify(nil)
+	require.Error(t, err)
 	require.Empty(t, payload)
 
 	// Check other errors

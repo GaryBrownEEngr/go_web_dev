@@ -13,6 +13,20 @@ type KeyDBStore struct {
 	mock.Mock
 }
 
+// Delete provides a mock function with given fields: ctx, key
+func (_m *KeyDBStore) Delete(ctx context.Context, key string) error {
+	ret := _m.Called(ctx, key)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) error); ok {
+		r0 = rf(ctx, key)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // Get provides a mock function with given fields: ctx, key, out
 func (_m *KeyDBStore) Get(ctx context.Context, key string, out interface{}) error {
 	ret := _m.Called(ctx, key, out)

@@ -29,8 +29,17 @@ func StringPtr(a string) *string {
 	return &a
 }
 
-func ToPtr[T int | int8 | int16 | int32 | int64 | uint8 | uint16 | uint32 | uint64 | float32 | float64 | string | bool](in T) *T {
+func ToPtr[T int | int8 | int16 | int32 | int64 | uint8 | uint16 | uint32 | uint64 | float32 | float64 | string | bool | time.Time](in T) *T {
 	return &in
+}
+
+// Return the underlying value or zero
+func ToValOrZero[T int | int8 | int16 | int32 | int64 | uint8 | uint16 | uint32 | uint64 | float32 | float64 | string | bool | time.Time](in *T) T {
+	if in == nil {
+		var ret T
+		return ret
+	}
+	return *in
 }
 
 func ToIntOrZero[T int | int8 | int16 | int32 | int64 | uint8 | uint16 | uint32 | uint64 | float32 | float64](in *T) int {

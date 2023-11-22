@@ -3,12 +3,12 @@ package api
 import (
 	"encoding/json"
 	"net/http"
-	"strings"
 
 	"github.com/GaryBrownEEngr/go_web_dev/backend/models"
 	"github.com/GaryBrownEEngr/go_web_dev/backend/sessionuser"
 	"github.com/GaryBrownEEngr/go_web_dev/backend/utils"
 	"github.com/GaryBrownEEngr/go_web_dev/backend/utils/stacktrs"
+	"github.com/GaryBrownEEngr/go_web_dev/backend/utils/uerr"
 )
 
 func (s *Server) userCreate() http.HandlerFunc {
@@ -89,17 +89,14 @@ func userLogin(users models.UserStore, tokenMaker models.TokenMaker, username, p
 
 func (s *Server) userDelete() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		token := r.Header.Get("Authorization")
-		tokenParts := strings.SplitN(token, " ", 2)
-		if len(tokenParts) != 2 || tokenParts[0] != "Bearer" {
-			err := utils.NewUserErrLog("Authorization Bearer header required", http.StatusUnauthorized, stacktrs.Errorf(token))
+		tokenPayload := utils.AuthMiddlewareGetTokenPayload(r.Context())
+		if tokenPayload == nil || tokenPayload.Username == "" {
+			err := uerr.UErrLog("Auth Error", http.StatusUnauthorized, stacktrs.Errorf("%#v", tokenPayload))
 			utils.OutputError(w, err)
 			return
 		}
-		token = tokenParts[1]
 
-		tokenT := models.Token(token)
-		err := userDelete(s.users, s.tokenMaker, &tokenT)
+		err := userDelete(s.users, tokenPayload)
 		if err != nil {
 			utils.OutputError(w, err)
 			return
@@ -109,17 +106,12 @@ func (s *Server) userDelete() http.HandlerFunc {
 	}
 }
 
-func userDelete(users models.UserStore, tokenMaker models.TokenMaker, token *models.Token) error {
-	if token == nil {
-		return utils.NewUserErrLogHash("Token Invalid", http.StatusUnauthorized, stacktrs.Errorf("Nil pointer"))
+func userDelete(users models.UserStore, tokenPayload *models.Payload) error {
+	if tokenPayload == nil {
+		return uerr.UErrLogHash("Token Invalid", http.StatusUnauthorized, stacktrs.Errorf("Nil pointer"))
 	}
 
-	payload, ok := tokenMaker.Verify(token)
-	if !ok {
-		return utils.NewUserErrLogHash("Token Invalid", http.StatusUnauthorized, stacktrs.Errorf(string(*token)))
-	}
-
-	err := users.DeleteUser(payload.Username)
+	err := users.DeleteUser(tokenPayload.Username)
 	if err != nil {
 		return err
 	}

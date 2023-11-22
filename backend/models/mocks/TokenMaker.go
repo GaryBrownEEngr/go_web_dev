@@ -15,18 +15,20 @@ type TokenMaker struct {
 }
 
 // Create provides a mock function with given fields: username, duration
-func (_m *TokenMaker) Create(username string, duration time.Duration) (models.Token, error) {
+func (_m *TokenMaker) Create(username string, duration time.Duration) (*models.Token, error) {
 	ret := _m.Called(username, duration)
 
-	var r0 models.Token
+	var r0 *models.Token
 	var r1 error
-	if rf, ok := ret.Get(0).(func(string, time.Duration) (models.Token, error)); ok {
+	if rf, ok := ret.Get(0).(func(string, time.Duration) (*models.Token, error)); ok {
 		return rf(username, duration)
 	}
-	if rf, ok := ret.Get(0).(func(string, time.Duration) models.Token); ok {
+	if rf, ok := ret.Get(0).(func(string, time.Duration) *models.Token); ok {
 		r0 = rf(username, duration)
 	} else {
-		r0 = ret.Get(0).(models.Token)
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*models.Token)
+		}
 	}
 
 	if rf, ok := ret.Get(1).(func(string, time.Duration) error); ok {
@@ -39,15 +41,15 @@ func (_m *TokenMaker) Create(username string, duration time.Duration) (models.To
 }
 
 // Verify provides a mock function with given fields: token
-func (_m *TokenMaker) Verify(token models.Token) (*models.Payload, bool) {
+func (_m *TokenMaker) Verify(token *models.Token) (*models.Payload, error) {
 	ret := _m.Called(token)
 
 	var r0 *models.Payload
-	var r1 bool
-	if rf, ok := ret.Get(0).(func(models.Token) (*models.Payload, bool)); ok {
+	var r1 error
+	if rf, ok := ret.Get(0).(func(*models.Token) (*models.Payload, error)); ok {
 		return rf(token)
 	}
-	if rf, ok := ret.Get(0).(func(models.Token) *models.Payload); ok {
+	if rf, ok := ret.Get(0).(func(*models.Token) *models.Payload); ok {
 		r0 = rf(token)
 	} else {
 		if ret.Get(0) != nil {
@@ -55,10 +57,10 @@ func (_m *TokenMaker) Verify(token models.Token) (*models.Payload, bool) {
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(models.Token) bool); ok {
+	if rf, ok := ret.Get(1).(func(*models.Token) error); ok {
 		r1 = rf(token)
 	} else {
-		r1 = ret.Get(1).(bool)
+		r1 = ret.Error(1)
 	}
 
 	return r0, r1

@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/GaryBrownEEngr/go_web_dev/backend/models"
+	"github.com/GaryBrownEEngr/go_web_dev/backend/utils"
 
 	"github.com/gorilla/mux"
 )
@@ -36,6 +37,7 @@ type Server struct {
 	mux        *mux.Router
 	secrets    models.SecretStore
 	users      models.UserStore
+	MathData   models.MathGameStore
 	tokenMaker models.TokenMaker
 }
 
@@ -68,6 +70,7 @@ func NewServer(
 	articles models.ArticleStore,
 	secrets models.SecretStore,
 	users models.UserStore,
+	mathData models.MathGameStore,
 	tokenMaker models.TokenMaker,
 ) *Server {
 	myRouter := mux.NewRouter().StrictSlash(true)
@@ -77,6 +80,7 @@ func NewServer(
 		articles:   articles,
 		secrets:    secrets,
 		users:      users,
+		MathData:   mathData,
 		tokenMaker: tokenMaker,
 	}
 
@@ -92,9 +96,14 @@ func (s *Server) AddRoutes() {
 	s.mux.HandleFunc("/api/article/{id}", deleteSingleArticle(s.articles)).Methods("DELETE")
 	s.mux.HandleFunc("/api/checkguess", checkGuess)
 
+	// User management
 	s.mux.HandleFunc("/api/user/create", s.userCreate()).Methods("POST")
 	s.mux.HandleFunc("/api/user/login", s.userLogin()).Methods("POST")
-	s.mux.HandleFunc("/api/user/delete", s.userDelete()).Methods("POST")
+	s.mux.Handle("/api/user/delete", utils.EnsureAuth(s.tokenMaker, s.userDelete())).Methods("POST")
+
+	// Math Game Data
+	s.mux.Handle("/api/mathgame/read", utils.EnsureAuth(s.tokenMaker, s.mathGameRead())).Methods("GET")
+	s.mux.Handle("/api/mathgame/write", utils.EnsureAuth(s.tokenMaker, s.mathGameWrite())).Methods("POST")
 
 	fileServer := http.FileServer(http.Dir("./static"))
 	s.mux.PathPrefix("/").Handler(fileServer)

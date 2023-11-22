@@ -38,13 +38,13 @@ func (_m *UserStore) CreateUser(username string, password string) (*models.User,
 	return r0, r1
 }
 
-// DeleteUser provides a mock function with given fields: in
-func (_m *UserStore) DeleteUser(in models.User) error {
-	ret := _m.Called(in)
+// DeleteUser provides a mock function with given fields: username
+func (_m *UserStore) DeleteUser(username string) error {
+	ret := _m.Called(username)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(models.User) error); ok {
-		r0 = rf(in)
+	if rf, ok := ret.Get(0).(func(string) error); ok {
+		r0 = rf(username)
 	} else {
 		r0 = ret.Error(0)
 	}

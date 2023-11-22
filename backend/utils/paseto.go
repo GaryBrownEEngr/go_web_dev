@@ -2,9 +2,12 @@ package utils
 
 import (
 	"fmt"
+	"net/http"
 	"time"
 
 	"github.com/GaryBrownEEngr/go_web_dev/backend/models"
+	"github.com/GaryBrownEEngr/go_web_dev/backend/utils/stacktrs"
+	"github.com/GaryBrownEEngr/go_web_dev/backend/utils/uerr"
 	"github.com/o1egl/paseto"
 	"golang.org/x/crypto/chacha20poly1305"
 )
@@ -44,22 +47,22 @@ func (s *pasetoMaker) Create(username string, duration time.Duration) (*models.T
 	return &token, nil
 }
 
-func (s *pasetoMaker) Verify(token *models.Token) (*models.Payload, bool) {
+func (s *pasetoMaker) Verify(token *models.Token) (*models.Payload, error) {
 	if token == nil {
-		return nil, false
+		return nil, uerr.UErrLogHash("Token Verify Error", http.StatusInternalServerError, stacktrs.Errorf("Token is nil"))
 	}
 
 	payload := &models.Payload{}
 
 	err := s.paseto.Decrypt(string(*token), s.symmetricKey, payload, nil)
 	if err != nil {
-		return nil, false
+		return nil, uerr.UErrLogHash("Token format invalid", http.StatusInternalServerError, fmt.Errorf("%#v", *token))
 	}
 
-	ok := payload.Valid()
-	if !ok {
-		return nil, false
+	err = payload.Valid()
+	if err != nil {
+		return nil, err
 	}
 
-	return payload, true
+	return payload, nil
 }
