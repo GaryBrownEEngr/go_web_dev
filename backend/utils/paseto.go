@@ -59,9 +59,14 @@ func (s *pasetoMaker) Verify(token *models.Token) (*models.Payload, error) {
 		return nil, uerr.UErrLogHash("Token format invalid", http.StatusInternalServerError, fmt.Errorf("%#v", *token))
 	}
 
-	err = payload.Valid()
-	if err != nil {
-		return nil, err
+	now := time.Now()
+	if now.After(payload.ExpiredAt) {
+		return nil, uerr.UErrLog("Token expired", http.StatusUnauthorized, fmt.Errorf(payload.Username))
+	}
+
+	// Make sure the token was created in the past, with 5 seconds of wiggle room.
+	if now.Add(time.Second * 5).Before(payload.IssuedAt) {
+		return nil, uerr.UErrLogHash("Token being used before created time", http.StatusUnauthorized, fmt.Errorf(payload.Username))
 	}
 
 	return payload, nil

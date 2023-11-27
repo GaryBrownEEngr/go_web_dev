@@ -39,4 +39,5 @@ func OutputErrorAndCode(w http.ResponseWriter, err error, code int) {
 
 	errorMsg := "Error: " + uerr.HashError(err)
 	http.Error(w, errorMsg, code)
+	log.Println(uerr.UnwrapAllErrorsForLog(err))
 }

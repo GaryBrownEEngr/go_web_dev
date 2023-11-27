@@ -1,9 +1,13 @@
 package utils
 
 import (
-	"fmt"
+	"errors"
 	"time"
 )
+
+type RealNumber interface {
+	int | int8 | int16 | int32 | int64 | uint8 | uint16 | uint32 | uint64 | float32 | float64
+}
 
 func Float32Ptr(a float32) *float32 {
 	return &a
@@ -29,12 +33,12 @@ func StringPtr(a string) *string {
 	return &a
 }
 
-func ToPtr[T int | int8 | int16 | int32 | int64 | uint8 | uint16 | uint32 | uint64 | float32 | float64 | string | bool | time.Time](in T) *T {
+func ToPtr[T RealNumber | string | bool | time.Time](in T) *T {
 	return &in
 }
 
 // Return the underlying value or zero
-func ToValOrZero[T int | int8 | int16 | int32 | int64 | uint8 | uint16 | uint32 | uint64 | float32 | float64 | string | bool | time.Time](in *T) T {
+func ToValOrZero[T RealNumber | string | bool | time.Time](in *T) T {
 	if in == nil {
 		var ret T
 		return ret
@@ -42,21 +46,21 @@ func ToValOrZero[T int | int8 | int16 | int32 | int64 | uint8 | uint16 | uint32 
 	return *in
 }
 
-func ToIntOrZero[T int | int8 | int16 | int32 | int64 | uint8 | uint16 | uint32 | uint64 | float32 | float64](in *T) int {
+func ToIntOrZero[T RealNumber](in *T) int {
 	if in == nil {
 		return 0
 	}
 	return int(*in)
 }
 
-func ToFloat32OrZero[T int | int8 | int16 | int32 | int64 | uint8 | uint16 | uint32 | uint64 | float32 | float64](in *T) float32 {
+func ToFloat32OrZero[T RealNumber](in *T) float32 {
 	if in == nil {
 		return 0
 	}
 	return float32(*in)
 }
 
-func ToFloat64OrZero[T int | int8 | int16 | int32 | int64 | uint8 | uint16 | uint32 | uint64 | float32 | float64](in *T) float64 {
+func ToFloat64OrZero[T RealNumber](in *T) float64 {
 	if in == nil {
 		return 0
 	}
@@ -90,7 +94,7 @@ func GetAge(dateOfBirth, compareDate time.Time) (int, error) {
 	compareDate = time.Date(bYear, bMonth, bDay, 0, 0, 0, 0, time.UTC)
 
 	if compareDate.Before(dateOfBirth) {
-		return 0, fmt.Errorf("Invalid, negative age")
+		return 0, errors.New("invalid, negative age")
 	}
 
 	age := bYear - aYear
