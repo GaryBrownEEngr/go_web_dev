@@ -1,8 +1,6 @@
 package api
 
 import (
-	"bytes"
-	"fmt"
 	"net/http"
 	"time"
 
@@ -12,28 +10,25 @@ import (
 	"github.com/gorilla/mux"
 )
 
-type LogResponseWriter struct {
-	http.ResponseWriter
-	statusCode int
-	buf        bytes.Buffer
-}
+func CORS(next http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Add("Access-Control-Allow-Origin", "*")
+		w.Header().Add("Access-Control-Allow-Credentials", "true")
+		w.Header().Add("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With")
+		w.Header().Add("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
 
-func NewLogResponseWriter(w http.ResponseWriter) *LogResponseWriter {
-	return &LogResponseWriter{ResponseWriter: w}
-}
+		if r.Method == "OPTIONS" {
+			http.Error(w, "No Content", http.StatusNoContent)
+			return
+		}
 
-func (w *LogResponseWriter) WriteHeader(code int) {
-	w.statusCode = code
-	w.ResponseWriter.WriteHeader(code)
-}
-
-func (w *LogResponseWriter) Write(body []byte) (int, error) {
-	w.buf.Write(body)
-	return w.ResponseWriter.Write(body)
+		next(w, r)
+	}
 }
 
 type Server struct {
 	articles   models.ArticleStore
+	handler    http.Handler
 	mux        *mux.Router
 	secrets    models.SecretStore
 	users      models.UserStore
@@ -41,29 +36,8 @@ type Server struct {
 	tokenMaker models.TokenMaker
 }
 
-func (m *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	startTime := time.Now()
-	logRespWriter := NewLogResponseWriter(w)
-
-	//	... operation that takes 20 milliseconds ...
-	//	t := time.Now()
-	//	elapsed := t.Sub(start)
-	logRespWriter.Header().Set("Access-Control-Allow-Origin", "*")
-	logRespWriter.Header().Set("Access-Control-Allow-Headers", "Content-Type")
-	logRespWriter.Header().Set("Access-Control-Allow-Methods", "*")
-
-	if r.Method == "OPTIONS" {
-		return
-	}
-	m.mux.ServeHTTP(logRespWriter, r)
-
-	endTime := time.Now()
-	elapsed := endTime.Sub(startTime)
-	fmt.Printf(
-		"duration=%dns status=%d path=%s\n",
-		elapsed,
-		logRespWriter.statusCode,
-		r.URL.Path)
+func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	s.handler.ServeHTTP(w, r)
 }
 
 func NewServer(
@@ -75,7 +49,11 @@ func NewServer(
 ) *Server {
 	myRouter := mux.NewRouter().StrictSlash(true)
 
+	// Stack the middlewares logging, and CORS
+	handler := utils.LogHttp(CORS(myRouter.ServeHTTP))
+
 	ret := &Server{
+		handler:    handler,
 		mux:        myRouter,
 		articles:   articles,
 		secrets:    secrets,
@@ -93,8 +71,9 @@ func (s *Server) AddRoutes() {
 	s.mux.HandleFunc("/api/articles", returnAllArticles(s.articles))
 	s.mux.HandleFunc("/api/article", createNewArticle(s.articles)).Methods("POST")
 	s.mux.HandleFunc("/api/article/{id}", returnSingleArticle(s.articles)).Methods("GET")
-	s.mux.HandleFunc("/api/article/{id}", deleteSingleArticle(s.articles)).Methods("DELETE")
+	s.mux.Handle("/api/article/{id}", deleteSingleArticle(s.articles)).Methods("DELETE")
 	s.mux.HandleFunc("/api/checkguess", checkGuess)
+	s.mux.Handle("/api/sleep", utils.TimeoutMiddleware(time.Second, sleep()))
 
 	// User management
 	s.mux.HandleFunc("/api/user/create", s.userCreate()).Methods("POST")

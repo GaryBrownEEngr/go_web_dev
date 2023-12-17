@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"time"
 
 	"github.com/GaryBrownEEngr/go_web_dev/backend/models"
 )
@@ -48,4 +49,13 @@ func checkGuess(w http.ResponseWriter, r *http.Request) {
 	}
 
 	_ = json.NewEncoder(w).Encode(result)
+}
+
+func sleep() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		time.Sleep(time.Second * 4)
+
+		fmt.Fprint(w, "sleeping")
+		fmt.Println("Done Working")
+	}
 }
