@@ -142,7 +142,7 @@ This uses the repo file: `.golangci.yaml`.
 Go [here](https://golangci-lint.run/usage/install/) for full instructions. The easiest option is to go install it with the following command:
 
 ```bash
-go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.51.0
+go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.55.2
 ```
 
 Then open your VS code settings and search for `go lint` and update the option `Go: Lint Tool` to be set to `golangci-lint`
