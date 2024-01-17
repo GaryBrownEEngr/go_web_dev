@@ -55,7 +55,7 @@ severity:
 
 linters-settings:
   gofumpt:
-    lang-version: "1.21.3"
+    lang-version: "1.21.6"
     # Module path which contains the source code being formatted.
     # Default: ""
     # Choose whether or not to use the extra rules that are disabled
