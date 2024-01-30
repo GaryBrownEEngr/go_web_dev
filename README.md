@@ -35,6 +35,31 @@ Now, we should be able to clone the repo using the SSH link.
 git clone git@github.com:GaryBrownEEngr/go_web_dev.git
 ```
 
+### Useful Git Commands
+
+```bash
+## Fetch all from remote, prune local stuff that has been deleted in the remote.
+git fetch --prune --prune-tags
+
+## Show a ansi art graph of the git repo.
+git log --all --decorate --oneline --graph
+
+## Checkout an existing branch
+git checkout <branch_name>
+
+## Create a new branch
+git checkout -b <new_name>
+
+## Delete a local branch
+git branch -D <branch_name>
+
+## move to a new location without actually changing any of the local files
+git reset --soft <git_hash>
+
+## move to a new location and update all the files locally.
+git reset --hard <git_hash>
+```
+
 ### Private repos and Golang
 
 If you have private repos that golang will need to build from. You will need to configure a replace directive inside of git. Then git will swich to using SSH mode, and use the key, to fetch the repos.
@@ -117,9 +142,6 @@ export PATH=$PATH:$(go env GOPATH)/bin
 alias bashrc="code ~/.bashrc"
 alias src="source ~/.bashrc"
 
-alias gitgraph="git log --all --decorate --oneline --graph"
-alias gitfetch="git fetch --prune --prune-tags"
-
 alias githubactionsgo="echo tidy && go mod tidy && echo build && go build ./... && echo vet && go vet ./... && echo test && go test ./... && echo lint && golangci-lint run"
 alias gocoveragehtml="go test -short ./... -coverprofile coverage.out && go tool cover -html=coverage.out -o coverage.html && sleep 2 && firefox coverage.html"
 ```
@@ -153,6 +175,12 @@ Then open your VS code settings and search for `go lint` and update the option `
 
 ```bash
 go install mvdan.cc/gofumpt@latest
+```
+
+#### Update the formatting of a file
+
+```bash
+gofumpt -w <filepath>
 ```
 
 ## Docker
