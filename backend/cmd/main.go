@@ -27,6 +27,11 @@ func main() {
 	}
 	fmt.Printf("Go Web Dev: %s, %s\n", gitHash.Hash, gitHash.BuildTime)
 
+	// Set the ENV variable "ZONEINFO" to where to find the file zoneinfo.zip.
+	// This is needed by the time package to know how to interpret time zones.
+	os.Setenv("ZONEINFO", "/app/zoneinfo.zip")
+	// l, err := time.LoadLocation("America/Los_Angeles")
+
 	// Setup pretend articles
 	Articles := []models.Article{
 		{Id: 1, Title: "Hello", Desc: "Article Description for Hello", Content: "Article Content for Hello"},

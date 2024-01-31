@@ -20,6 +20,7 @@ RUN npm run build
 FROM alpine
 RUN mkdir /app
 COPY --from=builder_Go /backend/cmd/main /app
+COPY --from=builder_Go /usr/local/go/lib/time/zoneinfo.zip /app/zoneinfo.zip
 COPY --from=builder_Node /frontend/build static/ticktacktoe/
 COPY git_hash.txt /git_hash.txt
 ADD static static
