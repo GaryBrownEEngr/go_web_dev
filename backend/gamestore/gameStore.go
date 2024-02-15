@@ -5,9 +5,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/GaryBrownEEngr/go_web_dev/backend/aws/awsDynamo"
 	"github.com/GaryBrownEEngr/go_web_dev/backend/models"
-	"github.com/GaryBrownEEngr/go_web_dev/backend/utils/stacktrs"
 	"github.com/GaryBrownEEngr/go_web_dev/backend/utils/uerr"
 )
 
@@ -23,12 +21,7 @@ type DbGameData struct {
 	JsonData  string    `dynamodbav:"json_data"`
 }
 
-func NewUserStore() (*gameStore, error) {
-	db, err := awsDynamo.NewDynamoDB("GoWebDev", "Name")
-	if err != nil {
-		return nil, stacktrs.Wrap(err)
-	}
-
+func NewUserStore(db models.KeyDBStore) (*gameStore, error) {
 	ret := &gameStore{
 		db: db,
 	}

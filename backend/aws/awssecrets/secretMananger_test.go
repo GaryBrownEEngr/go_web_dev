@@ -1,15 +1,9 @@
 package awssecrets
 
-import (
-	"testing"
+// func TestNewSecretManager(t *testing.T) {
+// 	t.SkipNow()
 
-	"github.com/stretchr/testify/require"
-)
-
-func TestNewSecretManager(t *testing.T) {
-	t.SkipNow()
-
-	got, err := NewSecretManager()
-	require.NoError(t, err)
-	require.NotNil(t, got)
-}
+// 	got, err := NewSecretManager()
+// 	require.NoError(t, err)
+// 	require.NotNil(t, got)
+// }

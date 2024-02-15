@@ -12,26 +12,18 @@ import (
 
 	"github.com/GaryBrownEEngr/go_web_dev/backend/api"
 	"github.com/GaryBrownEEngr/go_web_dev/backend/articlestore"
+	"github.com/GaryBrownEEngr/go_web_dev/backend/aws/awsDynamo"
 	"github.com/GaryBrownEEngr/go_web_dev/backend/aws/awssecrets"
 	"github.com/GaryBrownEEngr/go_web_dev/backend/gamestore"
+	"github.com/GaryBrownEEngr/go_web_dev/backend/gcp/gcpsecretmanager"
 	"github.com/GaryBrownEEngr/go_web_dev/backend/models"
 	"github.com/GaryBrownEEngr/go_web_dev/backend/sessionuser"
 	"github.com/GaryBrownEEngr/go_web_dev/backend/utils"
 )
 
-func main() {
-	log.SetFlags(log.Lshortfile)
-	gitHash, err := utils.GitBuildHashGet()
-	if err != nil {
-		log.Printf("Error while getting Git Hash: %v\n", err)
-	}
-	fmt.Printf("Go Web Dev: %s, %s\n", gitHash.Hash, gitHash.BuildTime)
-
-	// Set the ENV variable "ZONEINFO" to where to find the file zoneinfo.zip.
-	// This is needed by the time package to know how to interpret time zones.
-	os.Setenv("ZONEINFO", "/app/zoneinfo.zip")
-	// l, err := time.LoadLocation("America/Los_Angeles")
-
+func run(
+	getenv func(string) string,
+) {
 	// Setup pretend articles
 	Articles := []models.Article{
 		{Id: 1, Title: "Hello", Desc: "Article Description for Hello", Content: "Article Content for Hello"},
@@ -39,19 +31,45 @@ func main() {
 	}
 	articles := articlestore.NewStore(Articles)
 
-	// Setup AWS Secret Manager
-	secrets, err := awssecrets.NewSecretManager()
-	if err != nil {
-		log.Fatal(err)
+	cloudProvider := getenv("CLOUD_PROVIDER")
+
+	var err error
+	var secrets models.SecretStore
+	var userDataDb models.KeyDBStore
+	var gameDataDb models.KeyDBStore
+
+	switch cloudProvider {
+	case "AWS":
+		secrets, err = awssecrets.NewAwsSecretManager(getenv)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		userDataDb, err = awsDynamo.NewDynamoDB(getenv, "GoWebDev_user", "username")
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		gameDataDb, err = awsDynamo.NewDynamoDB(getenv, "GoWebDev", "Name")
+		if err != nil {
+			log.Fatal(err)
+		}
+
+	case "GCP":
+		secrets, err = gcpsecretmanager.NewGcpSecretManager(getenv)
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
+
 	fmt.Println(secrets.Get("Best bacon"))
 
 	// Setup AWS DynamoDB based user store
-	users, err := sessionuser.NewUserStore()
+	users, err := sessionuser.NewUserStore(userDataDb)
 	if err != nil {
 		log.Fatal(err)
 	}
-	mathData, err := gamestore.NewUserStore()
+	mathData, err := gamestore.NewUserStore(gameDataDb)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -82,4 +100,20 @@ func main() {
 	// go to http://localhost:10000/test2.html
 	// go to http://localhost:10000/api/articles
 	// go to http://localhost:10000/ticktacktoe
+}
+
+func main() {
+	log.SetFlags(log.Lshortfile)
+	gitHash, err := utils.GitBuildHashGet()
+	if err != nil {
+		log.Printf("Error while getting Git Hash: %v\n", err)
+	}
+	fmt.Printf("Go Web Dev: %s, %s\n", gitHash.Hash, gitHash.BuildTime)
+
+	// Set the ENV variable "ZONEINFO" to where to find the file zoneinfo.zip.
+	// This is needed by the time package to know how to interpret time zones.
+	os.Setenv("ZONEINFO", "/app/zoneinfo.zip")
+	// l, err := time.LoadLocation("America/Los_Angeles")
+
+	run(os.Getenv)
 }

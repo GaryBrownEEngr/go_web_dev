@@ -7,7 +7,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/GaryBrownEEngr/go_web_dev/backend/aws/awsDynamo"
 	"github.com/GaryBrownEEngr/go_web_dev/backend/models"
 	"github.com/GaryBrownEEngr/go_web_dev/backend/utils"
 	"github.com/GaryBrownEEngr/go_web_dev/backend/utils/stacktrs"
@@ -21,12 +20,7 @@ type userStore struct {
 
 var _ models.UserStore = &userStore{}
 
-func NewUserStore() (*userStore, error) {
-	db, err := awsDynamo.NewDynamoDB("GoWebDev_user", "username")
-	if err != nil {
-		return nil, stacktrs.Wrap(err)
-	}
-
+func NewUserStore(db models.KeyDBStore) (*userStore, error) {
 	garbageHash, err := utils.HashPassword("Garbage Password")
 	if err != nil {
 		return nil, stacktrs.Wrap(err)

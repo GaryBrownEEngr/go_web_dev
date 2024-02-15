@@ -2,6 +2,7 @@ package awsDynamo
 
 import (
 	"context"
+	"log"
 	"testing"
 	"time"
 
@@ -10,7 +11,18 @@ import (
 
 func TestNewDynamoDB(t *testing.T) {
 	t.SkipNow()
-	got, err := NewDynamoDB("GoWebDev", "Name")
+
+	getenv := func(in string) string {
+		switch in {
+		case "AWS_REGION":
+			return "us-west-2"
+		default:
+			log.Println("unknown env variable: ", in)
+			return ""
+		}
+	}
+
+	got, err := NewDynamoDB(getenv, "GoWebDev", "Name")
 	require.NoError(t, err)
 
 	type t1 struct {
@@ -43,7 +55,7 @@ func TestNewDynamoDB(t *testing.T) {
 
 	//
 	//
-	got, err = NewDynamoDB("GoWebDev_user", "username")
+	got, err = NewDynamoDB(getenv, "GoWebDev_user", "username")
 	require.NoError(t, err)
 	type DbUser struct {
 		Username       string    `dynamodbav:"username"`

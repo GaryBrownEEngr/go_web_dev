@@ -3,49 +3,39 @@ package awssecrets
 import (
 	"context"
 	"fmt"
-	"sync"
-	"time"
 
 	"github.com/GaryBrownEEngr/go_web_dev/backend/models"
+	"github.com/GaryBrownEEngr/go_web_dev/backend/utils"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/secretsmanager"
-	"github.com/jszwec/csvutil"
 )
 
-type cache struct {
-	cache      map[string]string
-	filled     bool
-	filledTime time.Time
-	lock       sync.RWMutex
-}
-
-var _ models.SecretStore = &cache{}
-
-func NewSecretManager() (*cache, error) {
-	ret := &cache{
-		cache: make(map[string]string),
-	}
-
-	err := ret.fill()
+func NewAwsSecretManager(getenv func(string) string) (models.SecretStore, error) {
+	secretName := getenv("AWS_SECRET_NAME")
+	// AWS_SECRET_NAME == "AppRunner/GoWebDev"
+	secretVal, err := GetSecret(getenv, secretName)
 	if err != nil {
 		return nil, err
 	}
 
-	return ret, nil
+	result, err := utils.NewSecretManager(secretVal)
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }
 
-func (s *cache) fill() error {
-	s.lock.Lock()
-	defer s.lock.Unlock()
-
-	secretName := "AppRunner/GoWebDev"
-	region := "us-west-2"
+// https://cloud.google.com/secret-manager/docs/reference/libraries#client-libraries-usage-go
+func GetSecret(getenv func(string) string, secretName string) (string, error) {
+	region := getenv("AWS_REGION")
+	// region := "us-west-2"
 
 	// https://aws.github.io/aws-sdk-go-v2/docs/configuring-sdk/
 	config, err := config.LoadDefaultConfig(context.TODO(), config.WithRegion(region))
 	if err != nil {
-		return fmt.Errorf("Error while loading AWS default config: %w", err)
+		return "", fmt.Errorf("Error while loading AWS default config: %w", err)
 	}
 
 	// Create Secrets Manager client
@@ -58,40 +48,12 @@ func (s *cache) fill() error {
 
 	result, err := svc.GetSecretValue(context.TODO(), input)
 	if err != nil {
-		return fmt.Errorf("Error while getting secrets: %w", err)
+		return "", fmt.Errorf("Error while getting secrets: %w", err)
 	}
 
 	if result.SecretString == nil {
-		return fmt.Errorf("Secret string is missing")
+		return "", fmt.Errorf("Secret string is missing")
 	}
 
-	type csvRow struct {
-		Key   string
-		Value string
-	}
-	var rows []csvRow
-	err = csvutil.Unmarshal([]byte(*result.SecretString), &rows)
-	if err != nil {
-		return fmt.Errorf("Error while unmarshaling secrets: %w", err)
-	}
-
-	for _, row := range rows {
-		s.cache[row.Key] = row.Value
-	}
-	s.filled = true
-	s.filledTime = time.Now()
-
-	return nil
-}
-
-func (s *cache) Get(key string) (string, error) {
-	s.lock.RLock()
-	defer s.lock.RUnlock()
-
-	ret, ok := s.cache[key]
-	if !ok {
-		return "", fmt.Errorf("Secet for key '%s' not found", key)
-	}
-
-	return ret, nil
+	return *result.SecretString, nil
 }

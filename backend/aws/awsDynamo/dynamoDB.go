@@ -24,13 +24,14 @@ var _ models.KeyDBStore = &dbState{}
 // https://docs.aws.amazon.com/code-library/latest/ug/go_2_dynamodb_code_examples.html
 // https://github.com/awsdocs/aws-doc-sdk-examples/blob/main/gov2/dynamodb/actions/table_basics.go#L216
 
-func NewDynamoDB(tableName, partitionKey string) (*dbState, error) {
+func NewDynamoDB(getenv func(string) string, tableName, partitionKey string) (*dbState, error) {
 	ret := &dbState{
 		tableName:    tableName,
 		partitionKey: partitionKey,
 	}
 
-	region := "us-west-2"
+	region := getenv("AWS_REGION")
+	// region := "us-west-2"
 	// https://aws.github.io/aws-sdk-go-v2/docs/configuring-sdk/
 	config, err := config.LoadDefaultConfig(context.Background(), config.WithRegion(region))
 	if err != nil {
@@ -53,6 +54,9 @@ func (s *dbState) Get(ctx context.Context, key string, out interface{}) error {
 	response, err := s.service.GetItem(ctx, params)
 	if err != nil {
 		return fmt.Errorf("Error when getting DynamoDB Key: %s, %s: %w", s.tableName, key, err)
+	}
+	if response == nil {
+		return models.KeyDbNoDocFound
 	}
 
 	err = attributevalue.UnmarshalMap(response.Item, out)
